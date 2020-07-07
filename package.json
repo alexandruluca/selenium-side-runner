@@ -31,7 +31,7 @@
     "js-yaml": "^3.13.1",
     "rimraf": "^2.6.2",
     "selenium-webdriver": "4.0.0-alpha.4",
-    "selianize": "3.17.0",
+    "selianize": "git+ssh://git@github.com/alexandruluca/selianize.git#3.17.0",
     "semver": "^5.5.1",
     "winston": "^2.4.0"
   },

@@ -37,7 +37,7 @@ var _rimraf = _interopRequireDefault(require("rimraf"));
 
 var _jsBeautify = require("js-beautify");
 
-var _selianizeStep = _interopRequireWildcard(require("selianize"));
+var _selianize = _interopRequireWildcard(require("selianize"));
 
 var _capabilities = _interopRequireDefault(require("./capabilities"));
 
@@ -253,14 +253,14 @@ function runProject(project) {
     dependencies: project.dependencies
   }), null, 2));
 
-  return (0, _selianizeStep.default)(project, {
+  return (0, _selianize.default)(project, {
     silenceErrors: true
   }, project.snapshot).then(code => {
     const tests = code.tests.reduce((tests, test) => {
       return tests += test.code;
     }, 'const utils = require("./utils.js");const tests = {};').concat('module.exports = tests;');
     writeJSFile(_path.default.join(projectPath, 'commons'), tests, '.js');
-    writeJSFile(_path.default.join(projectPath, 'utils'), (0, _selianizeStep.getUtilsFile)(), '.js');
+    writeJSFile(_path.default.join(projectPath, 'utils'), (0, _selianize.getUtilsFile)(), '.js');
     code.suites.forEach(suite => {
       if (!suite.tests) {
         // not parallel
