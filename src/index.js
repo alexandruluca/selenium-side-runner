@@ -310,7 +310,6 @@ function runProject(project) {
             : `beforeEach(() => {vars = {};});afterEach(async () => {
                 try {
                   await global.driver.close();
-                  await global.driver.quit();
                 } finally {
                   try {
                     await cleanup();
