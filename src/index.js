@@ -309,10 +309,14 @@ function runProject(project) {
             ? ''
             : `beforeEach(() => {vars = {};});afterEach(async () => {
                 try {
-                  await this.global.driver.close();
-                  await this.global.driver.quit();
+                  await global.driver.close();
+                  await global.driver.quit();
                 } finally {
-                  await cleanup();
+                  try {
+                    await cleanup();
+                  } catch(err) {
+                    // no handling
+                  } 
                 }
             });`
           writeJSFile(
