@@ -269,13 +269,13 @@ function runProject(project) {
       if (!suite.tests) {
         // not parallel
         const cleanup = suite.persistSession ? '' : `beforeEach(() => {vars = {};});afterEach(async () => {
-              try {
-                await this.global.driver.close();
-                await this.global.driver.quit();
-              } catch(err) {}
-              
-              await cleanup();
-            }});`;
+                try {
+                  await this.global.driver.close();
+                  await this.global.driver.quit();
+                } finally {
+                  await cleanup();
+                }
+            });`;
         writeJSFile(_path.default.join(projectPath, (0, _util2.sanitizeFileName)(suite.name)), `jest.setMock('selenium-webdriver', webdriver);\n// This file was generated using Selenium IDE\nconst tests = require("./commons.js");${code.globalConfig}${suite.code}${cleanup}`);
       } else if (suite.tests.length) {
         _fs.default.mkdirSync(_path.default.join(projectPath, (0, _util2.sanitizeFileName)(suite.name))); // parallel suite

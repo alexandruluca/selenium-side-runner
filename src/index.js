@@ -308,13 +308,13 @@ function runProject(project) {
           const cleanup = suite.persistSession
             ? ''
             : `beforeEach(() => {vars = {};});afterEach(async () => {
-              try {
-                await this.global.driver.close();
-                await this.global.driver.quit();
-              } catch(err) {}
-              
-              await cleanup();
-            }});`
+                try {
+                  await this.global.driver.close();
+                  await this.global.driver.quit();
+                } finally {
+                  await cleanup();
+                }
+            });`
           writeJSFile(
             path.join(projectPath, sanitizeFileName(suite.name)),
             `jest.setMock('selenium-webdriver', webdriver);\n// This file was generated using Selenium IDE\nconst tests = require("./commons.js");${
