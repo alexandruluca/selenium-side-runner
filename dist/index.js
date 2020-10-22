@@ -53,11 +53,15 @@ var _package = _interopRequireDefault(require("../package.json"));
 
 var _util2 = require("./util");
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _objectSpread2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -239,17 +243,17 @@ function runProject(project) {
 
   _fs.default.mkdirSync(projectPath);
 
-  _fs.default.writeFileSync(_path.default.join(projectPath, 'package.json'), JSON.stringify(_objectSpread2({
+  _fs.default.writeFileSync(_path.default.join(projectPath, 'package.json'), JSON.stringify(_objectSpread(_objectSpread({
     name: (0, _util2.sanitizeFileName)(project.name),
     version: '0.0.0',
-    jest: _objectSpread2({
+    jest: _objectSpread({
       extraGlobals: project.jest && project.jest.extraGlobals ? project.jest.extraGlobals : [],
       modulePaths: (0, _modulePath.default)(_path.default.join(__dirname, '../node_modules')),
       setupFilesAfterEnv: [require.resolve('jest-environment-selenium/dist/setup.js')],
       testEnvironment: 'jest-environment-selenium',
       testEnvironmentOptions: configuration
     }, configuration.outputFormat(project).jestConfiguration)
-  }, configuration.outputFormat(project).packageJsonConfiguration, {
+  }, configuration.outputFormat(project).packageJsonConfiguration), {}, {
     dependencies: project.dependencies
   }), null, 2));
 
@@ -264,7 +268,14 @@ function runProject(project) {
     code.suites.forEach(suite => {
       if (!suite.tests) {
         // not parallel
-        const cleanup = suite.persistSession ? '' : 'beforeEach(() => {vars = {};});afterEach(async () => (cleanup()));';
+        const cleanup = suite.persistSession ? '' : `beforeEach(() => {vars = {};});afterEach(async () => {
+              try {
+                await this.global.driver.close();
+                await this.global.driver.quit();
+              } catch(err) {}
+              
+              await cleanup();
+            }});`;
         writeJSFile(_path.default.join(projectPath, (0, _util2.sanitizeFileName)(suite.name)), `jest.setMock('selenium-webdriver', webdriver);\n// This file was generated using Selenium IDE\nconst tests = require("./commons.js");${code.globalConfig}${suite.code}${cleanup}`);
       } else if (suite.tests.length) {
         _fs.default.mkdirSync(_path.default.join(projectPath, (0, _util2.sanitizeFileName)(suite.name))); // parallel suite
