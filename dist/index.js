@@ -269,15 +269,7 @@ function runProject(project) {
       if (!suite.tests) {
         // not parallel
         const cleanup = suite.persistSession ? '' : `beforeEach(() => {vars = {};});afterEach(async () => {
-                try {
-                  await global.driver.close();
-                } finally {
-                  try {
-                    await cleanup();
-                  } catch(err) {
-                    // no handling
-                  } 
-                }
+                await cleanup();
             });`;
         writeJSFile(_path.default.join(projectPath, (0, _util2.sanitizeFileName)(suite.name)), `jest.setMock('selenium-webdriver', webdriver);\n// This file was generated using Selenium IDE\nconst tests = require("./commons.js");${code.globalConfig}${suite.code}${cleanup}`);
       } else if (suite.tests.length) {

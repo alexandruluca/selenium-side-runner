@@ -308,15 +308,7 @@ function runProject(project) {
           const cleanup = suite.persistSession
             ? ''
             : `beforeEach(() => {vars = {};});afterEach(async () => {
-                try {
-                  await global.driver.close();
-                } finally {
-                  try {
-                    await cleanup();
-                  } catch(err) {
-                    // no handling
-                  } 
-                }
+                await cleanup();
             });`
           writeJSFile(
             path.join(projectPath, sanitizeFileName(suite.name)),
